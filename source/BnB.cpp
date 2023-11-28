@@ -8,24 +8,24 @@ const int tabSize = 100;
 int final_path[tabSize]; // ostateczne rozwiązanie - odbyta droga
 bool visited[tabSize]; // tablica wizyt
 int final_res = INT_MAX; // ostatecznie rozwiązanie - waga drogi
-
-int minIncoming(int adj[tabSize][tabSize], int currentVertex, int size, bool visited[tabSize])
+int final_res_compare = final_res;
+int minIncoming(int adj[tabSize][tabSize], int currentVertex, int size)
 {
 	int min = INT_MAX;
 	for(int i = 0; i < size; i++)
 	{
-		if(adj[i][currentVertex] < min && adj[i][currentVertex] > 0 && visited[i] == false)
+		if(adj[i][currentVertex] < min && adj[i][currentVertex] > 0)
 			min = adj[i][currentVertex];
 	}
 	return min;
 }
 
 // Funkcja szukająca pierwszego minimum w danym wierzchołku
-int minOutgoing(int adj[tabSize][tabSize], int currentVertex, int size, bool visited[tabSize])
+int minOutgoing(int adj[tabSize][tabSize], int currentVertex, int size)
 {
 	int min = INT_MAX;
 	for (int i = 0; i < size; i++)
-		if (adj[currentVertex][i] < min && adj[currentVertex][i] > 0 && visited[i] == false) // Jeżeli droga istnieje i jest mniejsza od minimum -> ustawiamy minimum na daną drogę
+		if (adj[currentVertex][i] < min && adj[currentVertex][i] > 0) // Jeżeli droga istnieje i jest mniejsza od minimum -> ustawiamy minimum na daną drogę
 			min = adj[currentVertex][i];
 	return min;
 }
@@ -51,14 +51,12 @@ void TSPCycle(int adj[tabSize][tabSize], int curr_bound, int curr_weight, int le
 
 	for (int i=0; i < size; i++)
 	{
-
 		if (adj[curr_path[level-1]][i] > 0 && visited[i] == false) // sprawdzamy każdą istniejącą drogę do nieodwiedzonego wierzchołka wychodzącą od obecnego wierzchołka
 		{
 			int temp = curr_bound;
 			curr_weight += adj[curr_path[level-1]][i];
 			
-			curr_bound -= (minIncoming(adj, i, size, visited) + minOutgoing(adj, i, size, visited))/2;
-
+			curr_bound -= (minIncoming(adj, i, size) + minOutgoing(adj, i, size))/2;
 			if (curr_bound + curr_weight < final_res)
 			{
 				curr_path[level] = i;
@@ -66,7 +64,6 @@ void TSPCycle(int adj[tabSize][tabSize], int curr_bound, int curr_weight, int le
 
 				TSPCycle(adj, curr_bound, curr_weight, level+1, curr_path, size);
 			}
-
 			// W przypadku gdy nie znaleziono mniejszego ograniczenia lub wracamy resetujemy wszystkie potencjalnie zmienione informacje 
 			curr_weight -= adj[curr_path[level-1]][i]; // reset wagi
 			curr_bound = temp;                         // reset ograniczenia
@@ -77,7 +74,6 @@ void TSPCycle(int adj[tabSize][tabSize], int curr_bound, int curr_weight, int le
 		}
 	}
 }
-
 void TSP(int graf[tabSize][tabSize], int size)
 {
 	int curr_path[tabSize]; // obecna ścieżka
@@ -91,7 +87,7 @@ void TSP(int graf[tabSize][tabSize], int size)
 	// Kalkulacja pierwszego ograniczenia 
     // (według danej formuły: (pierwsze minimum wierzchołka + drugie minimum wierzchołka)/2
 	for (int i=0; i < size; i++)
-        curr_bound += (minIncoming(graf, i, size, visited) + minOutgoing(graf, i, size, visited))/2;
+        curr_bound += (minIncoming(graf, i, size) + minOutgoing(graf, i, size))/2;
 
 	visited[0] = true; // zaczynamy w wierzhołku 0
 	curr_path[0] = 0;
@@ -99,8 +95,7 @@ void TSP(int graf[tabSize][tabSize], int size)
 	TSPCycle(graf, curr_bound, 0, 1, curr_path, size);
     return;
 }
-
-clock_t test(int graf[tabSize][tabSize], int size) // jeden test dla pomiaru czasu
+clock_t test(int graf[tabSize][tabSize], int size) 
 {
     clock_t time;
     time = clock();
