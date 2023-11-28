@@ -1,0 +1,7 @@
+ustawienia pliku config.cfg:
+1 - liczba testów (ważne tylko w pomiarze czasowym)
+2 - plik wejściowy z danymi
+
+Kompilowane z pomoca flagi optymalizacyjnej -O3   
+
+Michał Rzepka
